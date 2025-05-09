@@ -5,13 +5,13 @@ import {
     DialogDescription,
     DialogTrigger,
     DialogContent,
-    DialogFooter,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 import { cn } from "@/lib/utils";
 
 import {
@@ -24,18 +24,18 @@ import {
     FormDescription,
 } from "./ui/form";
 import { Input } from "./ui/input";
-
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
+import { useState } from "react";
+
+import { createTask } from "../lib/crud";
 
 const formSchema = z.object({
     title: z.string().min(1, {
         message: "Title is required",
     }),
-    description: z.string().min(1, {
-        message: "Description is required",
-    }),
+    description: z.string().optional(),
     dueDate: z.date(),
 });
 
@@ -62,7 +62,7 @@ const DatePicker = ({ field }: { field: any }) => {
                 <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={(date) => date && field.onChange(date)}
                     initialFocus
                 />
             </PopoverContent>
@@ -70,7 +70,7 @@ const DatePicker = ({ field }: { field: any }) => {
     );
 };
 
-const AddTaskForm = () => {
+const AddTaskForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -83,8 +83,9 @@ const AddTaskForm = () => {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         // send data to server
-
         console.log(values);
+        if (onSuccess) onSuccess();
+        createTask({ ...values, id: uuidv4() });
     }
 
     return (
@@ -114,7 +115,7 @@ const AddTaskForm = () => {
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>Description (optional)</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -144,6 +145,7 @@ const AddTaskForm = () => {
                 </div>
                 <div className="flex justify-end">
                     <Button variant="outline" type="submit">
+                        <Plus className="mr-2 h-4 w-4" />
                         Add
                     </Button>
                 </div>
@@ -153,8 +155,10 @@ const AddTaskForm = () => {
 };
 
 const DialogAddTaskButton = () => {
+    const [open, setOpen] = useState(false);
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">Add Task</Button>
             </DialogTrigger>
@@ -165,7 +169,7 @@ const DialogAddTaskButton = () => {
                         Add a new task to your list
                     </DialogDescription>
                 </DialogHeader>
-                <AddTaskForm />
+                <AddTaskForm onSuccess={() => setOpen(false)} />
             </DialogContent>
         </Dialog>
     );
