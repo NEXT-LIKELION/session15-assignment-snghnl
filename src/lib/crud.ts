@@ -1,4 +1,4 @@
-import { db } from "./firebase";
+import { db } from "@/lib/firebase";
 import {
     doc,
     collection,
@@ -14,6 +14,7 @@ export type Task = {
     title: string;
     description?: string;
     dueDate: Date;
+    completed: boolean;
 };
 
 export const createTask = (task: Task) => {
@@ -35,6 +36,7 @@ export const getTaskById = async (id: string): Promise<Task> => {
 
 export const updateTask = async (id: string, task: Task) => {
     const taskRef = doc(db, "tasks", id);
+
     await updateDoc(taskRef, task);
 };
 

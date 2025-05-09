@@ -1,3 +1,5 @@
+"use client";
+
 import "./App.css";
 import { useState, useEffect } from "react";
 import {
@@ -10,8 +12,9 @@ import {
 } from "./components/ui/card";
 import DialogAddTaskButton from "./components/add-task";
 
-import { readTasks, type Task } from "./lib/crud";
+import { updateTask, readTasks, type Task } from "./lib/crud";
 
+import { Checkbox } from "@/components/ui/checkbox";
 function App() {
     const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -26,9 +29,32 @@ function App() {
                 <CardDescription>Manage your tasks</CardDescription>
             </CardHeader>
             <CardContent>
-                {tasks.map((task) => (
-                    <div key={task.id}>{task.title}</div>
-                ))}
+                <div className="flex flex-col gap-2">
+                    {tasks.length === 0 ? (
+                        <span>No tasks</span>
+                    ) : (
+                        tasks.map((task) => {
+                            return (
+                                <div
+                                    key={task.id}
+                                    className="flex flex-row gap-2"
+                                >
+                                    <Checkbox
+                                        id={task.id}
+                                        checked={task.completed}
+                                        onCheckedChange={() => {
+                                            updateTask(task.id, {
+                                                ...task,
+                                                completed: !task.completed,
+                                            });
+                                        }}
+                                    />
+                                    <div>{task.title}</div>
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
             </CardContent>
             <CardFooter className="flex justify-end mt-auto">
                 <DialogAddTaskButton />
