@@ -85,7 +85,7 @@ const AddTaskForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         // send data to server
         console.log(values);
         if (onSuccess) onSuccess();
-        createTask({ ...values, id: uuidv4(), completed: false });
+        createTask({ ...values, completed: false });
     }
 
     return (
